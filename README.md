@@ -1,4 +1,4 @@
-# 🚀 Jerney: Comprehensive DevSecOps & GitOps Platform
+#  Comprehensive DevSecOps & GitOps Platform
 
 [![CI/CD Pipeline](https://github.com/SuchanMadhikarmi/Devsecops_Project_Actions_ArgoCD/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/SuchanMadhikarmi/Devsecops_Project_Actions_ArgoCD/actions)
 [![Infrastructure](https://img.shields.io/badge/Infrastructure-Terraform-623CE4?style=flat-square&logo=terraform)](https://www.terraform.io/)
@@ -10,7 +10,7 @@ A complete, production-ready DevSecOps and GitOps project demonstrating a modern
 
 ---
 
-## 🏗️ Architecture Design
+## Architecture Design
 
 ### 1. The Application Stack
 The application itself follows a standard 3-tier web architecture natively built for high availability and containerization.
@@ -40,7 +40,7 @@ Rather than utilizing push-based delivery in GitHub Actions, **ArgoCD** runs *in
 
 ---
 
-## 🔒 Cloud Native Network Security
+##  Cloud Native Network Security
 To establish zero-trust boundary limits, native Kubernetes `NetworkPolicy` artifacts restrict transverse communications:
 - The backend API is only reachable from the React frontend.
 - The PostgreSQL database is completely walled-off, only allowing ingress calls natively coming from the configured Backend Pod.
@@ -48,7 +48,7 @@ To establish zero-trust boundary limits, native Kubernetes `NetworkPolicy` artif
 
 ---
 
-## 🧠 What I Learned & Key Takeaways
+##  What I Learned & Key Takeaways
 
 Completing this architectural endeavor allowed me to develop mastery over several vital DevSecOps domains:
 
@@ -60,7 +60,7 @@ Completing this architectural endeavor allowed me to develop mastery over severa
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 | Domain | Tools Used |
 |--------|------------|
@@ -74,7 +74,7 @@ Completing this architectural endeavor allowed me to develop mastery over severa
 
 ---
 
-## 🧑‍💻 How to Run Locally
+## How to Run Locally
 
 ### Prerequisites
 - Docker & Docker Compose
