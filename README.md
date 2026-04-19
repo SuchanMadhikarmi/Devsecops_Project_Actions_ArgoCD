@@ -1,180 +1,104 @@
-# 🛤️ Jerney — Blog Platform
+# 🚀 Jerney: Comprehensive DevSecOps & GitOps Platform
 
-A Gen-Z vibe blog platform built with a 3-tier architecture — React frontend, Node.js backend, and PostgreSQL database.
+[![CI/CD Pipeline](https://github.com/SuchanMadhikarmi/Devsecops_Project_Actions_ArgoCD/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/SuchanMadhikarmi/Devsecops_Project_Actions_ArgoCD/actions)
+[![Infrastructure](https://img.shields.io/badge/Infrastructure-Terraform-623CE4?style=flat-square&logo=terraform)](https://www.terraform.io/)
+[![Cloud](https://img.shields.io/badge/Cloud-AWS_EKS-232F3E?style=flat-square&logo=amazon-aws)](https://aws.amazon.com/)
+[![Security](https://img.shields.io/badge/Security-Trivy_%7C_Checkov-11B4ED?style=flat-square)](https://aquasecurity.github.io/trivy/)
+[![CD](https://img.shields.io/badge/CD-ArgoCD-ef7b4d?style=flat-square&logo=argo)](https://argo-cd.readthedocs.io/)
 
-![Tech Stack](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)
-![Tech Stack](https://img.shields.io/badge/Node.js-20-339933?style=flat-square&logo=node.js)
-![Tech Stack](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql)
-
----
-
-> [!IMPORTANT]
-> **Looking for the full DevSecOps implementation?**
-> Switch to the [`devops`](../../tree/devops) branch for Docker, Kubernetes (EKS Auto Mode), Terraform, CI/CD with GitHub Actions, container security scanning, and more.
->
-> ```bash
-> git checkout devops
-> ```
+A complete, production-ready DevSecOps and GitOps project demonstrating a modern software delivery lifecycle. **Jerney** is a 3-tier microservices application (React frontend, Node.js backend, and PostgreSQL) built to showcase automated security practices, scalable cloud infrastructure, container orchastration, and automated deployments.
 
 ---
 
-## ✨ Features
+## 🏗️ Architecture Design
 
-- 📝 Create blog posts with emoji vibes
-- ✏️ Edit your existing posts
-- 🗑️ Delete posts you're not feeling anymore
-- 💬 Comment on posts
-- 🎨 Gen-Z dark UI with glassmorphism and gradients
+### 1. The Application Stack
+The application itself follows a standard 3-tier web architecture natively built for high availability and containerization.
+- **Frontend**: React.js structured with Vite and deployed alongside an NGINX reverse-proxy.
+- **Backend**: Node.js & Express API, interacting securely with the database.
+- **Database**: PostgreSQL 16 with Persistent EBS Volumes for data durability.
 
-## 🏗️ Architecture
+### 2. Infrastructure as Code (IaC)
+Infrastructure is fully codified using **HashiCorp Terraform**, defining:
+- AWS VPC structures including multi-AZ subnets, NAT Gateways, and security definitions.
+- **Amazon EKS (Elastic Kubernetes Service) Auto Mode**, dynamically handling node provisioning without manual NodeGroup tracking.
+- Envelope encryption of Kubernetes secrets and full cluster auditing enabled by default.
 
-```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│   Frontend   │────▶│   Backend    │────▶│  PostgreSQL   │
-│   (React +   │◀────│  (Node.js +  │◀────│              │
-│    Nginx)    │     │   Express)   │     │              │
-│   Port 80    │     │  Port 5000   │     │  Port 5432   │
-└──────────────┘     └──────────────┘     └──────────────┘
-```
+### 3. The DevSecOps Pipeline
+A robust **GitHub Actions** pipeline has been engineered to bake security into the CI process natively *("Shift-Left")*.
+1. 🔍 **Code Linting:** Evaluates code quality using ESLint.
+2. 🛡️ **Software Composition Analysis (SCA):** Prevents vulnerable packages using dependency audits (`npm audit`).
+3. 🐳 **Image Build & Containerization:** Builds Docker images natively resolving caching, labels, and pushing securely to GitHub Container Registry (GHCR) using temporary permissions.
+4. 🔬 **Security Container Image Scan:** Employs **Trivy** to intercept and scan built Docker images for OS and library vulnerabilities stopping High/Critical CVEs before registry promotion.
+5. 🏗️ **IaC Security Scan:** Scans Kubernetes manifests and Terraform definitions statically using **Checkov** to prevent misconfigurations (e.g., ensuring security contexts align, root access points are dropped, etc.).
+6. 📋 **Dockerfile Linting:** Enforces best practices using **Hadolint**.
+7. 🚀 **Manifest Artifact Update:** Automatically patches the Kubernetes base manifest with the new container image SHA tag—this acts as the trigger for the CD process.
 
-## 📁 Project Structure
-
-```
-Jerney/
-├── frontend/                # React (Vite) frontend
-│   ├── src/                 # React components & pages
-│   ├── nginx.conf           # Nginx config for serving the app
-│   └── package.json
-├── backend/                 # Node.js Express API
-│   ├── src/                 # Routes, DB connection
-│   └── package.json
-├── deploy/                  # EC2 deployment scripts
-│   ├── setup.sh             # One-click EC2 setup script
-│   └── jerney-nginx.conf    # Nginx reverse proxy config
-└── README.md
-```
+### 4. GitOps & Continuous Deployment (ArgoCD)
+To guarantee high resilience and native declarative deployments, I evolved the delivery phase by integrating **ArgoCD**.
+Rather than utilizing push-based delivery in GitHub Actions, **ArgoCD** runs *inside* the EKS cluster. It acts as an active reconnaissance agent, continually monitoring this repository's `k8s/` directory. The moment the CI pipeline registers a new image tag to the `jerney.yaml` file, ArgoCD detects the configuration drift and synchronizes (pulls) the changes automatically into the cluster, creating a true **GitOps Continuous Deployment pattern.**
 
 ---
 
-## 🚀 Deploy on AWS EC2
+## 🔒 Cloud Native Network Security
+To establish zero-trust boundary limits, native Kubernetes `NetworkPolicy` artifacts restrict transverse communications:
+- The backend API is only reachable from the React frontend.
+- The PostgreSQL database is completely walled-off, only allowing ingress calls natively coming from the configured Backend Pod.
+- Least-privileged container SecurityContexts (`allowPrivilegeEscalation: false`, `readOnlyRootFilesystem: true`, dropping all capabilities, utilizing non-root users).
+
+---
+
+## 🧠 What I Learned & Key Takeaways
+
+Completing this architectural endeavor allowed me to develop mastery over several vital DevSecOps domains:
+
+- **EKS Auto Mode Configuration:** Navigated setting up AWS EKS directly with Terraform to dynamically provide compute using Auto Mode. Reduced operations overhead significantly compared directly with managing legacy NodeGroups.
+- **Implementing "Shift-Left" Security:** Fully recognized the value of embedding security checkpoints (`Trivy`, `Checkov`, and native Audits) early in the CI phase instead of reacting to infrastructure or image vulnerabilities post-deployment.
+- **GitOps Methodology Deployment:** Understood firsthand how traditional push-based deployments possess inherent security and drift issues compared to a pull-based logic orchestrated by **ArgoCD**. Treating Git as the ultimate Source-of-Truth dramatically streamlined rollbacks and cluster state visualization.
+- **Network Isolation:** Learned deeply about the differences between AWS Security Groups and Kubernetes `NetworkPolicy`. Hardening inter-pod communications mitigated internal network exploitation potentials manually mapping allowed traffic pathways.
+- **Persistence Handling in K8s:** Interfaced successfully with CSI drivers, establishing proper statefulness on `gp3` encrypted EBS chunks. 
+
+---
+
+## 🛠️ Technology Stack
+
+| Domain | Tools Used |
+|--------|------------|
+| **Development** | React.js, Vite, Node.js, Express, PostgreSQL |
+| **Containerization** | Docker, NGINX |
+| **Orchestration** | Kubernetes, Amazon EKS |
+| **Infrastructure** | Terraform, AWS |
+| **CI/CD** | GitHub Actions, GitOps |
+| **Continuous Deployment**| ArgoCD |
+| **Security (SecOps)** | Checkov (IaC), Trivy (Image Scan), Hadolint, ESLint |
+
+---
+
+## 🧑‍💻 How to Run Locally
 
 ### Prerequisites
+- Docker & Docker Compose
+- AWS CLI configured with credentials (for Terraform deployment)
+- `kubectl` and `terraform` installed 
 
-- An AWS EC2 instance running **Ubuntu 22.04+**
-- Security Group allowing inbound traffic on ports **22** (SSH) and **80** (HTTP)
-- SSH access to the instance
-
-### Step 1: Transfer the Code to EC2
-
+### 1. Running the Complete App Locally 
 ```bash
-# From your local machine
-scp -r -i your-key.pem ./Jerney ubuntu@<EC2_PUBLIC_IP>:~/Jerney
+docker-compose up --build
 ```
+The React application will be served at `http://localhost`, while the API is bound to `http://localhost:5000`.
 
-### Step 2: SSH into the Instance
-
+### 2. Deploying the Cloud Infrastructure
 ```bash
-ssh -i your-key.pem ubuntu@<EC2_PUBLIC_IP>
+cd terraform
+terraform init
+terraform apply -var="cluster_name=jerney-eks" -var="vpc_cidr=10.0.0.0/16"
 ```
 
-### Step 3: Run the Setup Script
-
-The `deploy/setup.sh` script installs everything and configures the app automatically:
-
+### 3. Securing to the Cluster & Installing ArgoCD
 ```bash
-cd ~/Jerney
-chmod +x deploy/setup.sh
-./deploy/setup.sh
+aws eks update-kubeconfig --region <aws-region> --name jerney-eks
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
 
-This script will:
-1. Update system packages
-2. Install **Node.js 20.x**, **PostgreSQL 16**, **Nginx**, and **PM2**
-3. Create the database and user
-4. Install backend dependencies
-5. Build the React frontend
-6. Configure Nginx as a reverse proxy
-7. Start the backend with PM2 (auto-restarts on crash/reboot)
-
-### Step 4: Access the App
-
-Open your browser and go to:
-
-```
-http://<EC2_PUBLIC_IP>
-```
-
-### Useful Commands
-
-```bash
-pm2 status                          # Check backend status
-pm2 logs                            # View backend logs
-pm2 restart all                     # Restart backend
-sudo systemctl restart nginx        # Restart Nginx
-sudo -u postgres psql -d jerney_db  # Connect to database
-```
-
----
-
-## 🧑‍💻 Local Development (Without Docker)
-
-### Prerequisites
-
-- Node.js 20+
-- PostgreSQL 16+
-
-### Backend
-
-```bash
-cd backend
-npm install
-
-# Create a .env file (or export these variables)
-export DB_HOST=localhost
-export DB_PORT=5432
-export DB_USER=jerney_user
-export DB_PASSWORD=jerney_pass_2026
-export DB_NAME=jerney_db
-export PORT=5000
-
-npm start
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-The Vite dev server starts on `http://localhost:3000` and proxies `/api` requests to the backend at `http://localhost:5000`.
-
----
-
-## 📡 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | Health check |
-| GET | `/api/posts` | Get all posts |
-| GET | `/api/posts/:id` | Get single post with comments |
-| POST | `/api/posts` | Create a new post |
-| PUT | `/api/posts/:id` | Update a post |
-| DELETE | `/api/posts/:id` | Delete a post |
-| GET | `/api/comments/post/:postId` | Get comments for a post |
-| POST | `/api/comments` | Create a comment |
-| DELETE | `/api/comments/:id` | Delete a comment |
-
-
----
-
-## 🌿 Branch Strategy
-
-| Branch | Purpose |
-|--------|---------|
-| `main` | Source code + EC2 bare-metal deployment |
-| `devops` | Full DevSecOps — Docker, Kubernetes (EKS), Terraform, CI/CD pipeline, security scanning |
-
----
-
+Once installed, structure an ArgoCD application pointing to this repository's `k8s/` directory and it will automatically reconcile the state of your cluster.
